@@ -1,4 +1,4 @@
-package com.smartwalkie.voicepingdemo
+package com.ibnux.pttoverceluler
 
 import android.app.Activity
 import androidx.appcompat.app.AlertDialog

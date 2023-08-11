@@ -1,4 +1,4 @@
-package com.smartwalkie.voicepingdemo
+package com.ibnux.pttoverceluler
 
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.SeekBar
@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.content.Context
 import android.util.Log
-import com.smartwalkie.voicepingdemo.databinding.ActivityPlayerBinding
+import com.ibnux.pttoverceluler.databinding.ActivityPlayerBinding
 import com.smartwalkie.voicepingsdk.VoicePing
 import java.io.File
 import java.io.FileNotFoundException

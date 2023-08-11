@@ -1,4 +1,4 @@
-package com.smartwalkie.voicepingdemo
+package com.ibnux.pttoverceluler
 
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +11,7 @@ import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
-import com.smartwalkie.voicepingdemo.databinding.ActivityMainBinding
+import com.ibnux.pttoverceluler.databinding.ActivityMainBinding
 import com.smartwalkie.voicepingsdk.ConnectionState
 import com.smartwalkie.voicepingsdk.VoicePing
 import com.smartwalkie.voicepingsdk.VoicePingButton
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         setContentView(binding.root)
 
         val userId = MyPrefs.userId ?: ""
+        val credential = MyPrefs.credentials ?: ""
         val company = MyPrefs.company ?: ""
         val serverUrl = MyPrefs.serverUrl ?: ""
         if (userId.isBlank() || company.isBlank() || serverUrl.isBlank()) {
@@ -85,13 +86,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         updateConnectionState(VoicePing.getConnectionState())
         VoicePing.setConnectionStateListener(this)
         if (VoicePing.getConnectionState() == ConnectionState.DISCONNECTED) {
-            VoicePing.connect(serverUrl, userId, company, object : ConnectCallback {
+            VoicePing.connect(serverUrl, credential, userId, company, object : ConnectCallback {
                 override fun onConnected() {
                     // Ignored
                 }
 
                 override fun onFailed(exception: VoicePingException) {
                     // Ignored
+                    exception.printStackTrace();
                 }
             })
         }
