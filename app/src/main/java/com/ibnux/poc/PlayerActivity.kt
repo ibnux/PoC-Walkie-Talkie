@@ -1,19 +1,21 @@
-package com.ibnux.pttoverceluler
+package com.ibnux.poc
 
-import androidx.appcompat.app.AppCompatActivity
-import android.widget.SeekBar
-import com.smartwalkie.voicepingsdk.VoicePingPlayer
-import android.content.Intent
-import android.widget.Toast
-import android.os.Bundle
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
-import com.ibnux.pttoverceluler.databinding.ActivityPlayerBinding
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.ibnux.poc.databinding.ActivityPlayerBinding
 import com.smartwalkie.voicepingsdk.VoicePing
+import com.smartwalkie.voicepingsdk.VoicePingPlayer
 import java.io.File
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 
 class PlayerActivity : AppCompatActivity() {
     private val TAG = "PlayerActivity"

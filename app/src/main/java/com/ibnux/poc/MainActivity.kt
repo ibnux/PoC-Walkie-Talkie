@@ -1,24 +1,24 @@
-package com.ibnux.pttoverceluler
+package com.ibnux.poc
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
-import com.smartwalkie.voicepingsdk.model.ChannelType
-import android.os.Bundle
-import com.smartwalkie.voicepingsdk.exception.VoicePingException
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
-import com.ibnux.pttoverceluler.databinding.ActivityMainBinding
+import com.ibnux.poc.databinding.ActivityMainBinding
 import com.smartwalkie.voicepingsdk.ConnectionState
 import com.smartwalkie.voicepingsdk.VoicePing
 import com.smartwalkie.voicepingsdk.VoicePingButton
 import com.smartwalkie.voicepingsdk.callback.ConnectCallback
 import com.smartwalkie.voicepingsdk.exception.ErrorCode
+import com.smartwalkie.voicepingsdk.exception.VoicePingException
 import com.smartwalkie.voicepingsdk.listener.*
 import com.smartwalkie.voicepingsdk.model.Channel
+import com.smartwalkie.voicepingsdk.model.ChannelType
 import java.nio.ByteBuffer
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         setContentView(binding.root)
 
         val userId = MyPrefs.userId ?: ""
-        val credential = MyPrefs.credentials ?: ""
         val company = MyPrefs.company ?: ""
         val serverUrl = MyPrefs.serverUrl ?: ""
         if (userId.isBlank() || company.isBlank() || serverUrl.isBlank()) {
@@ -86,14 +85,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         updateConnectionState(VoicePing.getConnectionState())
         VoicePing.setConnectionStateListener(this)
         if (VoicePing.getConnectionState() == ConnectionState.DISCONNECTED) {
-            VoicePing.connect(serverUrl, credential, userId, company, object : ConnectCallback {
+            VoicePing.connect(serverUrl, userId, company, object : ConnectCallback {
                 override fun onConnected() {
                     // Ignored
                 }
 
                 override fun onFailed(exception: VoicePingException) {
                     // Ignored
-                    exception.printStackTrace();
                 }
             })
         }
@@ -126,6 +124,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
             R.id.action_open_player -> startActivity(
                 PlayerActivity.generateIntent(this, mDestinationPath)
             )
+
             R.id.action_disconnect -> showDisconnectConfirmationDialog()
         }
         return true
@@ -141,6 +140,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
                 binding.layoutGroupButtons.visibility = View.VISIBLE
                 binding.voicePingButton.channelType = ChannelType.GROUP
             }
+
             1 -> {
                 binding.textReceiverIdLabel.text = "Target User ID"
                 channelType = ChannelType.PRIVATE

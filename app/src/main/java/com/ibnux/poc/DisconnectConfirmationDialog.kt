@@ -1,4 +1,4 @@
-package com.ibnux.pttoverceluler
+package com.ibnux.poc
 
 import android.app.Activity
 import androidx.appcompat.app.AlertDialog

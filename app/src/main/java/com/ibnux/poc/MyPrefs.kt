@@ -1,11 +1,11 @@
-package com.ibnux.pttoverceluler
+package com.ibnux.poc
 
 import android.content.Context
 import android.content.SharedPreferences
 
 object MyPrefs {
     private val sharedPrefs: SharedPreferences =
-        VoicePingClientApp.context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
+        VoicePingClientApp.context.getSharedPreferences("voiceping_sdk.sp", Context.MODE_PRIVATE)
 
     private const val USER_ID = "user_id"
     private const val COMPANY = "company"
@@ -26,7 +26,7 @@ object MyPrefs {
         }
 
     var serverUrl: String?
-        get() = sharedPrefs.getString(SERVER_URL, "")
+        get() = sharedPrefs.getString(SERVER_URL, "wss://poc.ibnux.com")
         set(value) {
             sharedPrefs.edit().putString(SERVER_URL, value).apply()
         }

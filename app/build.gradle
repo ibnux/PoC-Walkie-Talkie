@@ -13,24 +13,23 @@ def getGitHash = { ->
 
 android {
     compileSdkVersion 28
-
     defaultConfig {
-        applicationId "com.ibnux.pttoverceluler"
+        applicationId "com.ibnux.poc"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        setProperty("archivesBaseName", "POC-$versionName-$versionCode-${getGitHash()}")
+        setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
         buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
     }
     signingConfigs {
-        development {
-            storeFile file("development.keystore")
-            storePassword "voicepingdemo"
-            keyAlias "voicepingdemo"
-            keyPassword "voicepingdemo"
-        }
+//        development {
+//            storeFile file("development.keystore")
+//            storePassword "voicepingdemo"
+//            keyAlias "voicepingdemo"
+//            keyPassword "voicepingdemo"
+//        }
     }
     buildTypes {
         release {

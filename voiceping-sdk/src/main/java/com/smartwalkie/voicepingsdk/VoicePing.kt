@@ -20,7 +20,6 @@ object VoicePing {
     private lateinit var connection: Connection
     private lateinit var recorder: Recorder
 
-    private var credential: String? = null
     private var userId: String? = null
     private var company: String? = null
 
@@ -57,7 +56,7 @@ object VoicePing {
      * @param callback Callback
      */
     fun connect(userId: String, company: String, callback: ConnectCallback) {
-        connect(DEFAULT_SERVER_URL, "", userId, company, callback)
+        connect(DEFAULT_SERVER_URL, userId, company, callback)
     }
 
     /**
@@ -68,22 +67,18 @@ object VoicePing {
      * @param userId    User ID or Username
      * @param callback  Callback
      */
-    fun connect(serverUrl: String, credential: String, userId: String, company: String, callback: ConnectCallback) {
+    fun connect(serverUrl: String, userId: String, company: String, callback: ConnectCallback) {
         val realServerUrl = when {
             serverUrl.isBlank() -> DEFAULT_SERVER_URL
             serverUrl.endsWith("/") -> serverUrl.substring(0, serverUrl.length - 1)
             else -> serverUrl
         }
         this.userId = userId
-        this.credential = credential
         this.company = company
-        if(credential.isEmpty()){
-            this.credential = userId
-        }
         val deviceId =
             "${Build.MANUFACTURER}_${Build.MODEL}_${Build.FINGERPRINT}_${Build.BOOTLOADER}_${Build.DISPLAY}_${Build.HOST}"
         player.setServerUrl(realServerUrl)
-        connection.connect(realServerUrl, this.credential!!, deviceId, callback)
+        connection.connect(realServerUrl, getFullUserId(), deviceId, callback)
         recorder.setUserId(getFullUserId())
     }
 
