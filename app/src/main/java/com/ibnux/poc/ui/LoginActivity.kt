@@ -1,17 +1,15 @@
-package com.ibnux.poc
+package com.ibnux.poc.ui
 
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.ibnux.poc.MyPrefs
+import com.ibnux.poc.R
 import com.ibnux.poc.databinding.ActivityLoginBinding
-import com.smartwalkie.voicepingsdk.VoicePing
-import com.smartwalkie.voicepingsdk.callback.ConnectCallback
-import com.smartwalkie.voicepingsdk.exception.VoicePingException
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
 import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
@@ -31,7 +29,6 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.title = getString(R.string.app_name)
-        binding.editServerUrl.setText(MyPrefs.serverUrl ?: "")
         binding.buttonConnect.setOnClickListener {
             getFileConfiguration();
         }
@@ -65,7 +62,6 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         try {
             val file = File(folder, "poc.nux")
             if (file.exists()) {
-                Toast.makeText(this, folder.toString(), Toast.LENGTH_SHORT).show()
                 val inputAsString = FileInputStream(file).bufferedReader().use { it.readText() }
                 try {
                     val creds =
@@ -80,29 +76,13 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
                     val userId = MyPrefs.userId ?: ""
                     val company = MyPrefs.company ?: ""
                     val serverUrl = MyPrefs.serverUrl ?: ""
-                    VoicePing.connect(serverUrl, userId, company, object : ConnectCallback {
-                        override fun onConnected() {
-                            Log.v(TAG, "onConnected")
-                            showProgress(false)
-                            MyPrefs.userId = userId
-                            MyPrefs.company = company
-                            MyPrefs.serverUrl = serverUrl
-                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                            finish()
-                        }
-
-                        override fun onFailed(exception: VoicePingException) {
-                            Log.v(TAG, "onFailed")
-                            showProgress(false)
-                            Toast.makeText(
-                                this@LoginActivity,
-                                R.string.failed_to_sign_in,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    })
+                    if(userId.isNotBlank() && company.isNotBlank() && serverUrl.isNotBlank()) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    binding.txtInfo.setText("Gagal membaca isi poc.nux\n\n" + e.message)
                     Toast.makeText(
                         this,
                         "Gagal membaca isi poc.nux\n\n" + e.message,
@@ -118,6 +98,7 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
                         isSdcard = true;
                         folder = File("/sdcard");
                     } else {
+                        binding.txtInfo.setText("File poc.nux tidak ditemukan. " + file.toString())
                         Toast.makeText(
                             this,
                             "File poc.nux tidak ditemukan. " + file.toString(),
@@ -126,12 +107,12 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
                     }
                 } else {
                     folder = File(folder?.parent ?: "/");
-                    Log.d("POC", "to parent: " + folder.toString())
                     getFileConfiguration();
                 }
             }
         } catch (e: IOException) {
             e.printStackTrace()
+            binding.txtInfo.setText("Gagal mengambil data konfigurasi poc.nux\n\n" + e.message)
             Toast.makeText(
                 this,
                 "Gagal mengambil data konfigurasi poc.nux\n\n" + e.message,
@@ -139,17 +120,6 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
             ).show()
         }
     }
-
-//    override fun onStart() {
-//        super.onStart()
-//        val userId = MyPrefs.userId ?: ""
-//        val company = MyPrefs.company ?: ""
-//        val serverUrl = MyPrefs.serverUrl ?: ""
-//        if (userId.isNotBlank() && company.isNotBlank() && serverUrl.isNotBlank()) {
-//            startActivity(Intent(this, MainActivity::class.java))
-//            finish()
-//        }
-//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

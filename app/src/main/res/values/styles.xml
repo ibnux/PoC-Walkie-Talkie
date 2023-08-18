@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlActivated">@android:color/holo_blue_dark</item>
+        <item name="colorControlHighlight">@android:color/holo_blue_dark</item>
     </style>
 
     <style name="InputLabel" parent="TextAppearance.AppCompat.Caption">

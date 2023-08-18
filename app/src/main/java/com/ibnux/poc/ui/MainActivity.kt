@@ -1,14 +1,18 @@
-package com.ibnux.poc
+package com.ibnux.poc.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
+import android.content.*
+import android.os.Build
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.widget.addTextChangedListener
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.ibnux.poc.*
 import com.ibnux.poc.databinding.ActivityMainBinding
 import com.smartwalkie.voicepingsdk.ConnectionState
 import com.smartwalkie.voicepingsdk.VoicePing
@@ -19,7 +23,9 @@ import com.smartwalkie.voicepingsdk.exception.VoicePingException
 import com.smartwalkie.voicepingsdk.listener.*
 import com.smartwalkie.voicepingsdk.model.Channel
 import com.smartwalkie.voicepingsdk.model.ChannelType
+import org.json.JSONArray
 import java.nio.ByteBuffer
+import java.util.*
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     ConnectionStateListener, IncomingTalkListener {
@@ -30,6 +36,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     private var mToast: Toast? = null
     private var channelType = ChannelType.GROUP
     private var disconnectConfirmationDialog: DisconnectConfirmationDialog? = null
+    private var channelsJson = JSONArray()
+    private var groupID = "0";
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,28 +48,30 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         val userId = MyPrefs.userId ?: ""
         val company = MyPrefs.company ?: ""
         val serverUrl = MyPrefs.serverUrl ?: ""
+        val lastChannel = MyPrefs.lastChannel ?: 0
+        channelsJson = JSONArray(MyPrefs.channels ?: "[]")
         if (userId.isBlank() || company.isBlank() || serverUrl.isBlank()) {
             finish()
             return
         }
         initToolbar(userId, company)
-        binding.textServerUrl.text = serverUrl
-        val channelTypes = arrayOf("GROUP", "PRIVATE")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, channelTypes)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerChannelType.adapter = adapter
-        binding.spinnerChannelType.onItemSelectedListener = this
-        binding.buttonJoin.setOnClickListener { joinGroup() }
-        binding.buttonLeave.setOnClickListener { leaveGroup() }
-        binding.layoutGroupButtons.visibility = View.VISIBLE
-        binding.buttonMute.setOnClickListener { muteChannel() }
-        binding.buttonUnmute.setOnClickListener { unmuteChannel() }
-        binding.layoutIncomingTalk.visibility = View.GONE
-        binding.editReceiverId.addTextChangedListener {
-            val receiverId = it.toString()
-            binding.voicePingButton.receiverId = receiverId
-            binding.voicePingButton.setButtonEnabled(receiverId.isNotBlank())
+        val channels = Array(channelsJson.length()) {
+            channelsJson.getJSONObject(it).getString("name")
         }
+        val adapter = ArrayAdapter(this, R.layout.spinner_item, channels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerChannelList.adapter = adapter
+        binding.spinnerChannelList.onItemSelectedListener = this
+        if(lastChannel<channels.size){
+            binding.spinnerChannelList.setSelection(lastChannel)
+            groupID = channelsJson.getJSONObject(lastChannel).getString("id");
+        }else{
+            groupID = channelsJson.getJSONObject(0).getString("id");
+        }
+        binding.voicePingButton.receiverId = groupID
+
+        binding.voicePingButton.setButtonEnabled(true)
+        binding.voicePingButton.channelType = ChannelType.GROUP
         binding.voicePingButton.listener = object : VoicePingButton.Listener {
             override fun onStarted() {
                 log("VoicePingButton, PTT onStarted")
@@ -73,15 +83,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
 
             override fun onError(errorMessage: String) {
                 log("VoicePingButton, PTT error: $errorMessage")
-                val receiverId = binding.editReceiverId.text.toString().trim { it <= ' ' }
-                if (receiverId.isEmpty()) {
-                    binding.editReceiverId.error = getString(R.string.cannot_be_blank)
-                }
+                //binding.textInformation.text = "VoicePingButton, PTT error: $errorMessage"
+                speak(errorMessage)
             }
         }
         VoicePing.setIncomingTalkListener(this)
-        binding.voicePingButton.channelType = ChannelType.PRIVATE
-        binding.voicePingButton.setButtonEnabled(false)
         updateConnectionState(VoicePing.getConnectionState())
         VoicePing.setConnectionStateListener(this)
         if (VoicePing.getConnectionState() == ConnectionState.DISCONNECTED) {
@@ -95,20 +101,29 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
                 }
             })
         }
+
+        joinGroup()
     }
 
     private fun initToolbar(userId: String, company: String) {
-        supportActionBar?.title = "User ID: $userId"
-        supportActionBar?.subtitle = "Company: $company"
+        supportActionBar?.title = "$userId - $company"
+        supportActionBar?.subtitle = "PoC NuX"
     }
 
     private fun updateConnectionState(connectionState: ConnectionState) {
         log("updateConnectionState: ${connectionState.name}")
         binding.textConnectionState.text = connectionState.name
+        if(connectionState == ConnectionState.CONNECTED) {
+            speak("connected")
+        }else if(connectionState == ConnectionState.CONNECTING){
+            speak("connecting")
+        }else if(connectionState == ConnectionState.DISCONNECTED){
+            speak("disconnected")
+        }
         val colorResId = when (connectionState) {
             ConnectionState.DISCONNECTED -> R.color.red
             ConnectionState.CONNECTING -> R.color.yellow
-            ConnectionState.CONNECTED -> R.color.green
+            ConnectionState.CONNECTED -> R.color.white
         }
         binding.textConnectionState.setTextColor(ContextCompat.getColor(this, colorResId))
     }
@@ -120,33 +135,50 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_open_player -> startActivity(
+        return when (item.itemId){
+            R.id.action_change_ptt -> {
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Click The Button")
+                    .setOnKeyListener(object : DialogInterface.OnKeyListener {
+                        override fun onKey(
+                            dialog: DialogInterface,
+                            keyCode: Int,
+                            event: KeyEvent?
+                        ): Boolean {
+                            Toast.makeText(applicationContext,
+                                "Key $keyCode selected", Toast.LENGTH_SHORT).show()
+                            MyPrefs.button_ptt = keyCode
+                            dialog.dismiss()
+                            return true
+                        }
+                    })
+                builder.setPositiveButton("Close") { dialog, which ->
+                    dialog.dismiss()
+                }
+                builder.show()
+                true
+            }
+            R.id.action_open_player -> {
                 PlayerActivity.generateIntent(this, mDestinationPath)
-            )
-
-            R.id.action_disconnect -> showDisconnectConfirmationDialog()
+                true
+            }
+            R.id.action_disconnect -> {
+                showDisconnectConfirmationDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return true
     }
 
     // OnItemSelectedListener
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        if (parent !== binding.spinnerChannelType) return
-        when (position) {
-            0 -> {
-                binding.textReceiverIdLabel.text = "Group ID"
-                channelType = ChannelType.GROUP
-                binding.layoutGroupButtons.visibility = View.VISIBLE
-                binding.voicePingButton.channelType = ChannelType.GROUP
-            }
-
-            1 -> {
-                binding.textReceiverIdLabel.text = "Target User ID"
-                channelType = ChannelType.PRIVATE
-                binding.layoutGroupButtons.visibility = View.GONE
-                binding.voicePingButton.channelType = ChannelType.PRIVATE
-            }
+        if (parent === binding.spinnerChannelList) {
+            leaveGroup();
+            MyPrefs.lastChannel = position;
+            groupID = channelsJson.getJSONObject(position).getString("id");
+            log("Join Group $groupID")
+            binding.voicePingButton.receiverId= groupID;
+            joinGroup()
         }
     }
 
@@ -225,42 +257,27 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     }
 
     private fun joinGroup() {
-        val groupId = binding.editReceiverId.text.toString().trim { it <= ' ' }
-        if (groupId.isBlank()) {
-            binding.editReceiverId.error = getString(R.string.cannot_be_blank)
-            binding.editReceiverId.requestFocus()
-            return
-        }
-        log("joinGroup, group ID: $groupId")
-        VoicePing.joinGroup(groupId)
-        showToast("Joined to $groupId")
+        log("joinGroup, group ID: $groupID")
+        VoicePing.joinGroup(groupID)
+        showToast("Joined to "+channelsJson.getJSONObject(binding.spinnerChannelList.selectedItemPosition).getString("name"))
         Utils.closeKeyboard(this, currentFocus)
     }
 
     private fun leaveGroup() {
-        val groupId = binding.editReceiverId.text.toString().trim { it <= ' ' }
-        if (groupId.isBlank()) {
-            binding.editReceiverId.error = getString(R.string.cannot_be_blank)
-            binding.editReceiverId.requestFocus()
-            return
-        }
-        log("leaveGroup, group ID: $groupId")
-        VoicePing.leaveGroup(groupId)
-        showToast("Left from $groupId")
+        log("leaveGroup, group ID: $groupID")
+        VoicePing.leaveGroup(groupID)
         Utils.closeKeyboard(this, currentFocus)
     }
 
     private fun muteChannel() {
-        val receiverId = binding.editReceiverId.text.toString().trim { it <= ' ' }
-        if (receiverId.isBlank()) return
+        val receiverId = groupID
         log("muteChannel, target ID: $receiverId, channel type: ${ChannelType.getText(channelType)}")
         VoicePing.mute(receiverId, channelType)
         showToast("Channel $receiverId muted")
     }
 
     private fun unmuteChannel() {
-        val receiverId = binding.editReceiverId.text.toString().trim { it <= ' ' }
-        if (receiverId.isBlank()) return
+        val receiverId = groupID
         log("unmuteChannel, target ID: $receiverId, channel type: ${ChannelType.getText(channelType)}")
         VoicePing.unmute(receiverId, channelType)
         showToast("Channel $receiverId unmuted")
@@ -288,6 +305,69 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     }
 
     private fun log(message: String) {
+        Log.d(TAG, "------------------------")
         Log.d(TAG, message)
+        Log.d(TAG, "------------------------")
+    }
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        VoicePingClientApp.activityVisible = false
+        leaveGroup()
+        super.onDestroy()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        log("keyCode: $keyCode");
+        if(keyCode== MyPrefs.button_ptt){
+            binding.voicePingButton.startTalking()
+            return true;
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        log("keyCode: $keyCode");
+        if(keyCode== MyPrefs.button_ptt){
+            binding.voicePingButton.stopTalking()
+            return true;
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
+    public fun speak(text: String){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Call Lollipop+ function
+            VoicePingClientApp.textToSpeechEngine.speak(text, TextToSpeech.QUEUE_ADD, null, "tts1")
+        } else {
+            // Call Legacy function
+            VoicePingClientApp.textToSpeechEngine.speak(text, TextToSpeech.QUEUE_ADD, null)
+        }
+    }
+
+    override fun onResume() {
+        VoicePingClientApp.activityVisible = true
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter("broadcasr_message"))
+        super.onResume()
+    }
+
+
+    override fun onBackPressed() {
+        VoicePingClientApp.activityVisible = false;
+        moveTaskToBack(true)
+    }
+
+    var receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent != null) {
+                if(intent.hasExtra("message")) {
+                    speak(intent.getStringExtra("message"))
+                }
+            }
+        }
     }
 }

@@ -5,6 +5,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <uses-feature android:name="android.hardware.location" android:required="false"/>
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.location.network" android:required="false"/>
+    <uses-feature android:name="com.kyocera.PTTKEYAPI" android:required="false"/>
+    <uses-feature android:name="com.kyocera.SOSKEYAPI" android:required="false"/>
 
     <application
         android:name=".VoicePingClientApp"
@@ -14,24 +21,114 @@
         android:theme="@style/AppTheme"
         tools:replace="android:label"
         tools:targetApi="r">
+        <receiver
+            android:name=".services.BootReceiver"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".services.PTTReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="9999999">
+                <action android:name="com.kyocera.android.intent.action.PTT_BUTTON" />
+                <action android:name="com.zello.ptt.down"/>
+                <action android:name="com.zello.ptt.up"/>
+                <action android:name="com.zello.ptt.toggle"/>
+                <action android:name="com.zello.intent.extraButton1.down"/>
+                <action android:name="com.zello.intent.extraButton1.up"/>
+                <action android:name="com.zello.intent.extraButton2.down"/>
+                <action android:name="com.zello.intent.extraButton2.up"/>
+                <action android:name="com.zello.intent.extraButton3.down"/>
+                <action android:name="com.zello.intent.extraButton3.up"/>
+                <action android:name="com.zello.intent.extraButton4.down"/>
+                <action android:name="com.zello.intent.extraButton4.up"/>
+                <action android:name="com.zello.intent.buttonSOS.down"/>
+                <action android:name="com.zello.intent.buttonSOS.up"/>
+                <action android:name="com.sonim.intent.action.PTT_KEY_DOWN"/>
+                <action android:name="com.sonim.intent.action.PTT_KEY_UP"/>
+                <action android:name="com.sonim.intent.action.SOS_KEY_DOWN"/>
+                <action android:name="com.sonim.intent.action.SOS_KEY_UP"/>
+                <action android:name="com.honeywell.intent.action.AUDIO_PTT_STATE_CHANGE"/>
+                <action android:name="com.kyocera.android.intent.action.PHONE_SPEAKER_KEY"/>
+                <action android:name="com.kyocera.intent.EXTEND_ACTION_CAMERAKEYEVENT"/>
+                <action android:name="com.kyocera.intent.action.SOS_BUTTON"/>
+                <action android:name="com.ruggear.intent.action.SOS"/>
+                <action android:name="com.ruggear.intent.action.PTT.CHANNEL.next"/>
+                <action android:name="com.ruggear.intent.action.PTT.CHANNEL.prev"/>
+                <action android:name="com.kodiak.intent.action.KEYCODE_SOS"/>
+                <action android:name="android.intent.action.PTT.down"/>
+                <action android:name="android.intent.action.PTT.up"/>
+                <action android:name="com.runbo.ptt.key.down"/>
+                <action android:name="com.runbo.ptt.key.up"/>
+                <action android:name="com.kyocera.intent.action.PTT_BUTTON"/>
+                <action android:name="com.kodiak.intent.action.PTT_BUTTON"/>
+                <action android:name="com.dfl.a9.camdown"/>
+                <action android:name="com.dfl.a9.camup"/>
+                <action android:name="com.android.extKey.voice.down"/>
+                <action android:name="com.android.extKey.voice.up"/>
+                <action android:name="com.android.extKey.one.down"/>
+                <action android:name="com.android.extKey.one.up"/>
+                <action android:name="com.android.extKey.two.down"/>
+                <action android:name="com.android.extKey.two.up"/>
+                <action android:name="com.android.extKey.three.down"/>
+                <action android:name="com.android.extKey.three.up"/>
+                <action android:name="android.intent.action.sos.down"/>
+                <action android:name="android.intent.action.sos.up"/>
+                <action android:name="android.intent.action.button1Key"/>
+                <action android:name="android.intent.action.button2Key"/>
+                <action android:name="android.intent.action.SOS.down"/>
+                <action android:name="android.intent.action.SOS.up"/>
+                <action android:name="android.intent.action.FUNC_LONG_PRESS"/>
+                <action android:name="com.android.action.KEYCODE_FORWARD_NEW"/>
+                <action android:name="com.android.action.KEYCODE_BACKWARD"/>
+                <action android:name="com.android.action.KEYCODE_SURE"/>
+                <action android:name="com.elektrobit.pttbutton.PTTBUTTON_DOWN"/>
+                <action android:name="com.elektrobit.pttbutton.PTTBUTTON_UP"/>
+                <action android:name="com.bittium.emergencybutton.EMERGENCY_DOWN"/>
+                <action android:name="com.bittium.emergencybutton.EMERGENCY_UP"/>
+                <action android:name="android.intent.action.FUNCTION_KEY_DOWN_PRESSED"/>
+                <action android:name="android.intent.action.FUNCTION_KEY_RELEASED"/>
+                <action android:name="android.intent.action.FUNCTION_KEY1_DOWN_PRESSED"/>
+                <action android:name="android.intent.action.FUNCTION_KEY1_RELEASED"/>
+                <action android:name="com.mcx.intent.action.CRITICAL_COMMUNICATION_CONTROL_KEY"/>
+                <action android:name="com.mcx.intent.action.CRITICAL_COMMUNICATION_SOS_KEY"/>
+                <action android:name="com.samsung.android.knox.intent.action.HARD_KEY_REPORT "/>
+                <action android:name="com.apollo.intent.action.PTT_BUTTON"/>
+                <action android:name="com.apollo.intent.action.PANIC_BUTTON"/>
+                <action android:name="com.symbol.button.L2"/>
+                <action android:name="com.symbol.button.R2"/>
+                <action android:name="com.android.ptt.down"/>
+                <action android:name="com.android.ptt.up"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter android:priority="9999999">
+                <action android:name="com.kyocera.android.intent.action.PTT_BUTTON"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".PlayerActivity"
+            android:name=".ui.PlayerActivity"
             android:screenOrientation="portrait" />
-
     </application>
 
 </manifest>

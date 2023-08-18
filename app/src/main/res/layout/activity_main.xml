@@ -1,141 +1,51 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:gravity="center_horizontal">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            style="@style/InputLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Server URL" />
-
-        <TextView
-            android:id="@+id/text_server_url"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="24dp"
-            android:padding="4dp"
-            android:text="Server URL"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-
-        <TextView
-            style="@style/InputLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Connection State" />
-
+        android:gravity="center">
         <TextView
             android:id="@+id/text_connection_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="24dp"
-            android:padding="4dp"
+            android:focusable="true"
             android:text="DISCONNECTED"
             android:textColor="@color/red"
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TextView
-            style="@style/InputLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Channel Type" />
-
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="6dp"
             android:background="@drawable/bg_rounded_outline">
 
             <Spinner
-                android:id="@+id/spinner_channel_type"
+                android:id="@+id/spinner_channel_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp" />
+                tools:listitem="@layout/spinner_item" />
 
         </FrameLayout>
 
         <TextView
-            android:id="@+id/text_receiver_id_label"
-            style="@style/InputLabel"
+            android:id="@+id/textInformation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Group ID" />
-
-        <EditText
-            android:id="@+id/edit_receiver_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="12345"
-            android:maxLines="1" />
-
-        <LinearLayout
-            android:id="@+id/layout_group_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_join"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/join" />
-
-            <Button
-                android:id="@+id/button_leave"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/leave" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/button_mute"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/mute" />
-
-            <Button
-                android:id="@+id/button_unmute"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/unmute" />
-
-        </LinearLayout>
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="Channel" />
 
         <com.smartwalkie.voicepingsdk.VoicePingButton
             android:id="@+id/voice_ping_button"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginTop="16dp" />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

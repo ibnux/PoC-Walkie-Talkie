@@ -1,4 +1,4 @@
-package com.ibnux.poc
+package com.ibnux.poc.ui
 
 import android.content.Context
 import android.content.Intent

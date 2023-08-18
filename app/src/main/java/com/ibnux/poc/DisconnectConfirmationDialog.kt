@@ -21,9 +21,6 @@ class DisconnectConfirmationDialog(activity: Activity, listener: Listener) {
                 }
             })
         }
-        .setNegativeButton(android.R.string.cancel) { _, _ ->
-            // do nothing
-        }
         .create()
 
     fun show() {

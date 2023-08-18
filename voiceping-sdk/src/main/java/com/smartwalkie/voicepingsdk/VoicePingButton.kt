@@ -36,6 +36,7 @@ class VoicePingButton @JvmOverloads constructor(
     var channelType: Int = 0
     private var buttonEnabled: Boolean = true
 
+
     init {
         inflate(context, R.layout.view_voice_ping_button, this)
         layoutVpButton = findViewById(R.id.layout_vp_button)
@@ -59,32 +60,43 @@ class VoicePingButton @JvmOverloads constructor(
     }
 
     private fun proceedTouchAction(eventAction: Int): Boolean {
-        val targetId = receiverId ?: ""
-        val isValid = targetId.isNotBlank() && ChannelType.isValid(channelType)
+
         when (eventAction) {
             MotionEvent.ACTION_DOWN -> {
                 // PTT button pressed
-                if (isValid) {
-                    layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_yellow)
-                    VoicePing.startTalking(targetId, channelType, this)
-                    listener?.onStarted()
-                } else {
-                    layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_grey)
-                    listener?.onError("Invalid receiverId or channelType")
-                }
+                startTalking()
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 // PTT button released
-                layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_primary)
-                if (isValid) {
-                    VoicePing.stopTalking()
-                    listener?.onStopped()
-                }
+                stopTalking()
                 return true
             }
         }
         return false
+    }
+
+    public fun startTalking(){
+        val targetId = receiverId ?: ""
+        val isValid = targetId.isNotBlank() && ChannelType.isValid(channelType)
+        if (isValid) {
+            layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_yellow)
+            VoicePing.startTalking(targetId, channelType, this)
+            listener?.onStarted()
+        } else {
+            layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_grey)
+            listener?.onError("Invalid receiverId or channelType")
+        }
+    }
+
+    public fun stopTalking(){
+        val targetId = receiverId ?: ""
+        val isValid = targetId.isNotBlank() && ChannelType.isValid(channelType)
+        layoutVpButton.setBackgroundResource(R.drawable.bg_rounded_primary)
+        if (isValid) {
+            VoicePing.stopTalking()
+            listener?.onStopped()
+        }
     }
 
     override fun onOutgoingTalkStarted(audioRecorder: AudioRecorder) {
@@ -138,6 +150,7 @@ class VoicePingButton @JvmOverloads constructor(
 
     private fun showToast(message: String?) {
         if (message.isNullOrBlank()) return
+        listener?.onError(message)
         mainHandler.post {
             toast?.cancel()
             toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)

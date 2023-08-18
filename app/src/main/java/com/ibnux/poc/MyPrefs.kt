@@ -12,6 +12,8 @@ object MyPrefs {
     private const val SERVER_URL = "server_url"
     private const val CREDENTIALS = "credentials"
     private const val CHANNELS = "channels"
+    private const val LAST_CHANNEL = "last_channel"
+    private const val PTT_BUTTON = "button"
 
     var userId: String?
         get() = sharedPrefs.getString(USER_ID, "")
@@ -41,6 +43,26 @@ object MyPrefs {
         get() = sharedPrefs.getString(CREDENTIALS, "")
         set(value) {
             sharedPrefs.edit().putString(CREDENTIALS, value).apply()
+        }
+
+    var lastChannel: Int?
+        get() = sharedPrefs.getInt(LAST_CHANNEL, 0)
+        set(value) {
+            if (value != null) {
+                sharedPrefs.edit().putInt(LAST_CHANNEL, value).apply()
+            }else{
+                sharedPrefs.edit().putInt(LAST_CHANNEL, 0).apply()
+            }
+        }
+
+    var button_ptt: Int?
+        get() = sharedPrefs.getInt(PTT_BUTTON, 265)
+        set(value) {
+            if (value != null) {
+                sharedPrefs.edit().putInt(PTT_BUTTON, value).apply()
+            }else{
+                sharedPrefs.edit().putInt(PTT_BUTTON, 265).apply()
+            }
         }
 
     fun clear() {
