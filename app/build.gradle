@@ -20,8 +20,8 @@ android {
         versionCode 1
         versionName "1.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
-        buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
+//        setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
+//        buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
     }
     signingConfigs {
 //        development {
